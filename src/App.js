@@ -137,7 +137,9 @@ class App extends Component {
       }
       return prevState;
     }, () => {
-      this.refreshCatalog();
+      this.sortMarketplaceContent(() => {
+        this.forceUpdate();
+      });
     });
   }
 
