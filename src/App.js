@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import * as Catalog from './Catalog'
 import { Button } from 'react-bootstrap';
@@ -75,11 +74,11 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
+          <img src="./diamond.gif" alt="diamond!" height="50" />
           <h1 className="App-title">Welcome to Minecraft Market Place Demo</h1>
         </header>
         <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
+          Don't be too impressed by this WIP.
         </p>
         <MarketplaceCardList cards_data={this.state.card_data} />
       </div>
