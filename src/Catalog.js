@@ -14,7 +14,7 @@ const searchBody = {
         "field": "creationDate",
         "orderByDirection": "ASC"
     },
-    "top": 25
+    "top": 75
 };
 
 export function search(callback) {

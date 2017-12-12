@@ -1,17 +1,31 @@
 import React, { Component } from 'react';
 import './App.css';
 import * as Catalog from './Catalog'
-import { Button } from 'react-bootstrap';
+import * as Moment from 'moment'
+
+function sortMarketplaceItems(items, sortKey) {
+  items.sort(function(a, b) {
+    if(a[sortKey] > b[sortKey]) {
+      return-1;
+    }
+    else {
+      return 1;
+    }
+  });
+
+  return items;
+}
 
 const MarketplaceCard = (props) => {
   // Generate stars controls
   let stars = []
   for (let i = 0; i < 5; ++i) {
-    if (i < props.stars) {
-      var starDiv = <div className="glyphicon glyphicon-star" key={i}/>;
+    let starDiv = null;
+    if (i < Math.round(Number(props.average_rating))) {
+      starDiv = <div className="glyphicon glyphicon-star" key={i} />;
     }
     else {
-      var starDiv = <div className="glyphicon glyphicon-star-empty" key={i}/>;
+      starDiv = <div className="glyphicon glyphicon-star-empty" key={i} />;
     }
     stars.push(starDiv);
   }
@@ -20,11 +34,14 @@ const MarketplaceCard = (props) => {
     <div className="col-sm-3 col-md-2">
       <div className="thumbnail">
         <img className="card-image" width="300" src={props.image_url} alt={props.title} />
-        <div className="caption">
-          <h3>{props.title} {props.label}</h3>
-          <div>By {props.author}</div>
-          <div>{stars}</div>
-          <button className="btn btn-default">View</button>
+        <div>
+          <h4>{props.title} {props.label}</h4>
+          <div>
+            <div>By {props.author}</div>
+            <div>Created {Moment(props.creation_date).format('MM/DD/YYYY')}</div>
+            <div>{stars} {props.average_rating} ({props.total_ratings} ratings)</div>
+          </div>
+          <button className="btn btn-default" width="100">View</button>
         </div>
       </div>
     </div>
@@ -37,7 +54,8 @@ let sCardListData = [
     title: "Relics of the Privateers",
     image_url: "https://ugcorigin.s-microsoft.com/12/78ec6765-ceb2-4ced-b874-bb4a4dbbd576/550/profile.jpg",
     key: "G009SXM3DGGW_ModSkuId_",
-    label: <span className="label label-default">New</span>
+    label: <span className="label label-danger">New!</span>,
+    average_rating: 2.3,
   }
 ]
 
@@ -71,18 +89,30 @@ class App extends Component {
 
       let freshMarketplaceItems = []
 
+      const twoWeeksAgo = new Date(+new Date - 12096e5);
       for (var i = 0; i < marketplaceItems.length; i++) {
         let currentItem = marketplaceItems[i].document;
+
+        const currentCreationData = Date.parse(currentItem.creationDate);
+
+        let labelControl = null;
+        if(currentCreationData > twoWeeksAgo) {
+          labelControl = <span className="label label-danger">New!</span>;
+        }
 
         freshMarketplaceItems.push({
           author: currentItem.creatorGamertag,
           title: currentItem.title,
           image_url: currentItem.thumbnailUrl,
           key: currentItem.productId,
-          label: <span className="label label-default">New</span>,
-          stars: currentItem.averageRating
+          label: labelControl,
+          average_rating: currentItem.averageRating ? currentItem.averageRating : 0,
+          total_ratings: currentItem.totalRatingsCount ? currentItem.totalRatingsCount : 0,
+          creation_date: currentItem.creationDate,
         });
       }
+
+      freshMarketplaceItems = sortMarketplaceItems(freshMarketplaceItems, 'creation_date');
 
       this.setState({ card_data: freshMarketplaceItems });
     })
