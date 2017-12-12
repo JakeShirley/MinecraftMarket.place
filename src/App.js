@@ -2,30 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import * as Catalog from './Catalog'
-import axios from 'axios';
-
-// class Button extends React.Component {
-// 	constructor(props) {
-//   	super(props);
-
-//     this.state = {
-//     	counter: 0
-//     };
-//   }
-
-//   click = () => {
-//   	this.setState((prevState) => ({
-//   		counter: prevState.counter + 1
-//     }));
-//   }
-
-// 	render() {
-//     return (<button onClick={this.click}>
-//       {this.state.counter}
-//     </button>
-//     )
-//   }
-// };
+import { Button } from 'react-bootstrap';
 
 const MarketplaceCard = (props) => {
   return (
@@ -34,6 +11,7 @@ const MarketplaceCard = (props) => {
       <div className="card-info">
         <div className="card-info-title">{props.title}</div>
         <div>{props.author}</div>
+        <button className="btn btn-default">TestButton</button>
       </div>
     </div>
   )

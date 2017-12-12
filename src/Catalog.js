@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const sApiUrl = "http://127.0.0.1/";
+const sApiUrl = "http://minecraftmarketplaceproxy.azurewebsites.net/";
 
 const searchBody = {
     "count": true,
