@@ -33,9 +33,9 @@ export class SingleSelectionDropdown extends React.Component {
 
             let currentOptionTextControl = [currentOption.text];
             if (this.props.selected_option === currentOption) {
-                let isDefaultSort = (this.props.selected_option.current_sort === this.props.selected_option.default_sort);
+                const isDefaultSort = (this.props.selected_option.current_sort === this.props.selected_option.default_sort);
                 currentOptionTextControl.push(" ");
-                currentOptionTextControl.push(<i className={isDefaultSort ? "fa fa-arrow-down" : "fa fa-arrow-up"} aria-hidden="true" key="Arrows"></i>);
+                currentOptionTextControl.push(<i className={isDefaultSort ? "fa fa-arrow-down" : "fa fa-arrow-up"} aria-hidden="true" key="Arrow"></i>);
 
                 selectedOptionLabelControls = currentOptionTextControl;
             }
@@ -55,14 +55,15 @@ export class SingleSelectionDropdown extends React.Component {
         );
     }
 }
-/*
+
 export class MultiSelectionDropdown extends React.Component {
     constructor(props) {
         super(props);
 
         // Methods
-        this.toggle = this.toggle.bind(this);
+        this.isSelected = this.isSelected.bind(this);
         this.onClick = this.onClick.bind(this);
+        this.toggle = this.toggle.bind(this);
 
         this.state = {
             dropdown_open: false,
@@ -75,24 +76,30 @@ export class MultiSelectionDropdown extends React.Component {
         });
     }
 
+    isSelected(option) {
+        return this.props.selected_options.some(item => item === option);
+    }
+
     onClick(selectedOption) {
-        this.props.select_option(selectedOption);
+        // check if we're currently selected
+        if(this.isSelected(selectedOption)) {
+            this.props.deselect_option(selectedOption);
+        }
+        else {
+            this.props.select_option(selectedOption);
+        }
     }
 
     render() {
         let availableOptionControls = []
-        let selectedOptionLabelControls = null;
 
         for (var optionKey in this.props.available_options) {
             let currentOption = this.props.available_options[optionKey];
 
             let currentOptionTextControl = [currentOption.text];
-            if (this.props.selected_option.key === currentOption.key) {
-                let isSelected = (this.props.selected_option.current_sort === this.props.selected_option.default_sort);
+            if (this.isSelected(currentOption)) {
                 currentOptionTextControl.push(" ");
-                currentOptionTextControl.push(<i className={isDefaultSort ? "fa fa-check" : "fa fa-arrow-up"} aria-hidden="true" key="Arrows"></i>);
-
-                selectedOptionLabelControls = currentOptionTextControl;
+                currentOptionTextControl.push(<i className="fa fa-check" aria-hidden="true" key="Check"></i>);
             }
 
             availableOptionControls.push(<DropdownItem key={optionKey} onClick={(e) => this.onClick(currentOption)}>{currentOptionTextControl}</DropdownItem>)
@@ -101,7 +108,7 @@ export class MultiSelectionDropdown extends React.Component {
         return (
             <Dropdown isOpen={this.state.dropdown_open} toggle={this.toggle}>
                 <DropdownToggle caret>
-                    {this.props.label_prefix}{selectedOptionLabelControls}
+                    {this.props.label}
                 </DropdownToggle>
                 <DropdownMenu>
                     {availableOptionControls}
@@ -110,4 +117,3 @@ export class MultiSelectionDropdown extends React.Component {
         );
     }
 }
-*/
