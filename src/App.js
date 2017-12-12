@@ -94,6 +94,7 @@ class App extends Component {
     this.addContentTypeFilter = this.addContentTypeFilter.bind(this);
     this.removeContentTypeFilter = this.removeContentTypeFilter.bind(this);
     this.getContentType = this.getContentType.bind(this);
+    this.refreshCatalog = this.refreshCatalog.bind(this);
 
     this.state = {
       unfiltered_card_data: [],
@@ -111,12 +112,12 @@ class App extends Component {
   }
 
   getContentType(contentTypes, xforgeEntry) {
-     // Check if any of our tags are currently applied
-     for (let tagIndex = 0; tagIndex < xforgeEntry.tags.length; ++tagIndex) {
+    // Check if any of our tags are currently applied
+    for (let tagIndex = 0; tagIndex < xforgeEntry.tags.length; ++tagIndex) {
       for (var filterIndex in contentTypes) {
         // Found a tag that is currently applied
         if (xforgeEntry.tags[tagIndex] === contentTypes[filterIndex].xforge_key) {
-         return contentTypes[filterIndex];
+          return contentTypes[filterIndex];
         }
       }
     }
@@ -136,9 +137,7 @@ class App extends Component {
       }
       return prevState;
     }, () => {
-      this.sortMarketplaceContent(() => {
-        this.forceUpdate();
-      });
+      this.refreshCatalog();
     });
   }
 
@@ -155,9 +154,7 @@ class App extends Component {
 
       return prevState;
     }, () => {
-      this.sortMarketplaceContent(() => {
-        this.forceUpdate();
-      });
+      this.refreshCatalog();
     });
   }
 
@@ -174,9 +171,7 @@ class App extends Component {
 
       return prevState;
     }, () => {
-      this.sortMarketplaceContent(() => {
-        this.forceUpdate();
-      });
+      this.refreshCatalog();
     });
   }
 
@@ -188,7 +183,7 @@ class App extends Component {
         let currentCardData = prevState.unfiltered_card_data[i];
 
         // Check if any of our tags are currently applied
-        if(this.getContentType(prevState.current_content_types, currentCardData)) {
+        if (this.getContentType(prevState.current_content_types, currentCardData)) {
           cardData.push(currentCardData);
         }
         else {
@@ -204,17 +199,23 @@ class App extends Component {
     }, () => { if (callback) { callback(); } });
   }
 
-  componentDidMount() {
-    Catalog.search(marketplaceItems => {
+  refreshCatalog() {
+    let tags = [];
+    for (let i = 0; i < this.state.current_content_types.length; ++i) {
+      tags.push(this.state.current_content_types[i].xforge_key);
+    }
 
+    Catalog.search(tags, marketplaceData => {
       let freshMarketplaceItems = []
 
       const twoWeeksAgo = new Date(new Date() - 12096e5);
+
+      let marketplaceItems = marketplaceData.results;
       for (var i = 0; i < marketplaceItems.length; i++) {
         let currentItem = marketplaceItems[i].document;
 
         const contentType = this.getContentType(this.state.content_types, currentItem);
-        if(!contentType) {
+        if (!contentType) {
           console.log("Trying to load xforge item with unknown content type");
           continue;
         }
@@ -244,6 +245,10 @@ class App extends Component {
       // Set state then sort
       this.setState({ unfiltered_card_data: freshMarketplaceItems }, () => this.sortMarketplaceContent());
     })
+  }
+
+  componentDidMount() {
+    this.refreshCatalog();
   }
 
   render() {
