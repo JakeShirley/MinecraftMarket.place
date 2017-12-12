@@ -5,7 +5,7 @@ const sApiUrl = "http://minecraftmarketplaceproxy.azurewebsites.net/";
 const searchBody = {
     "count": true,
     "filter": {
-        "filterQuery": "contentType eq 'MarketplaceDurableCatalog_V1.2'and platforms/any(p: p eq 'uwp.store') and (tags/any(t: t eq 'mashup') or tags/any(t: t eq 'worldtemplate'))",
+        "filterQuery": "contentType eq 'MarketplaceDurableCatalog_V1.2'and platforms/any(p: p eq 'uwp.store') and (tags/all(t: t ne 'realms'))",
         "scids": [
             "4fc10100-5f7a-4470-899b-280835760c07"
         ]

@@ -6,9 +6,10 @@
     "axios": "^0.17.1",
     "moment": "^2.19.4",
     "react": "^16.2.0",
-    "react-bootstrap": "^0.31.5",
     "react-dom": "^16.2.0",
-    "react-scripts": "1.0.17"
+    "react-scripts": "1.0.17",
+    "reactstrap": "^5.0.0-alpha.4",
+    "semantic-ui-react": "^0.77.1"
   },
   "scripts": {
     "start": "react-scripts start",

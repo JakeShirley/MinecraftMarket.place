@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import './App.css';
-import * as Catalog from './Catalog'
-import * as Moment from 'moment'
+import * as Catalog from './Catalog';
+import * as Moment from 'moment';
+import { SingleSelectionDropdown } from './SingleSelectionDropDown';
 
-function sortMarketplaceItems(items, sortKey) {
+function sortMarketplaceItems(items, sortKey, swapDirection) {
   items.sort(function (a, b) {
     if (a[sortKey] > b[sortKey]) {
-      return -1;
+      return swapDirection ? 1 : -1;
     }
     else {
-      return 1;
+      return swapDirection ? -1 : 1;
     }
   });
 
@@ -77,13 +78,57 @@ const MarketplaceCardList = (props) => {
   )
 }
 
+const sSortOptions = {
+  creation_date: { sort_key: 'creation_date', text: 'By Creation Date', default_sort: false },
+
+  author: { sort_key: 'author', text: 'By Author', default_sort: true },
+  title: { sort_key: 'title', text: 'By Title', default_sort: true },
+  average_rating: { sort_key: 'average_rating', text: 'By Average Rating', default_sort: false },
+  total_ratings: { sort_key: 'total_ratings', text: 'By Total Ratings', default_sort: false },
+};
+
 class App extends Component {
   constructor(props) {
     super(props);
 
+    // Methods
+    this.setSortOptions = this.setSortOptions.bind(this);
+    this.sortMarketplaceContent = this.sortMarketplaceContent.bind(this);
+
     this.state = {
-      card_data: sCardListData
+      card_data: sCardListData,
+      current_sort_options: sSortOptions.creation_date,
+      sort_options: sSortOptions,
     };
+
+    for(var optionKey in this.state.sort_options) {
+      let currentOption = this.state.sort_options[optionKey];
+      currentOption.current_sort = currentOption.default_sort;
+    }
+  }
+
+  setSortOptions(sort_options) {
+    this.setState((prevState) => {
+      // Either swap direction if we're toggling the same option or assign to the new one
+      if(prevState.current_sort_options.key === sort_options.key) {
+        prevState.current_sort_options.current_sort = !prevState.current_sort_options.current_sort;
+      }
+      else {
+        prevState.current_sort_options = sort_options;
+        prevState.current_sort_options.current_sort = prevState.current_sort_options.default_sort;
+      }
+      return prevState;
+    });
+
+    this.sortMarketplaceContent();
+    this.forceUpdate();
+  }
+
+  sortMarketplaceContent() {
+    this.setState((prevState) => {
+      prevState.card_data = sortMarketplaceItems(prevState.card_data, prevState.current_sort_options.sort_key, prevState.current_sort_options.current_sort);
+      return prevState;
+    });
   }
 
   componentDidMount() {
@@ -115,9 +160,8 @@ class App extends Component {
         });
       }
 
-      freshMarketplaceItems = sortMarketplaceItems(freshMarketplaceItems, 'creation_date');
-
-      this.setState({ card_data: freshMarketplaceItems });
+      // Set state then sort
+      this.setState({ card_data: freshMarketplaceItems }, () => this.sortMarketplaceContent());
     })
   }
 
@@ -128,6 +172,9 @@ class App extends Component {
           <img src="./diamond.gif" alt="diamond!" height="50" />
           <h1 className="App-title">Welcome to Minecraft Market Place Demo</h1>
         </header>
+        <nav className="navbar navbar-toggleable-md navbar-light bg-faded">
+          <SingleSelectionDropdown available_options={this.state.sort_options} selected_option={this.state.current_sort_options} select_option={this.setSortOptions} label_prefix="Sort "/>
+        </nav>
         <p className="App-intro">
           Don't be too impressed by this WIP.
         </p>
