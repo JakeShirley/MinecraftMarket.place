@@ -110,7 +110,7 @@ class App extends Component {
   setSortOptions(sort_options) {
     this.setState((prevState) => {
       // Either swap direction if we're toggling the same option or assign to the new one
-      if(prevState.current_sort_options.key === sort_options.key) {
+      if(prevState.current_sort_options === sort_options) {
         prevState.current_sort_options.current_sort = !prevState.current_sort_options.current_sort;
       }
       else {
