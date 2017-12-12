@@ -69,11 +69,28 @@ class App extends Component {
   }
 
   componentDidMount() {
-    axios.get(`http://www.reddit.com/r/teslamoters.json`)
-      .then(res => {
-        const posts = res.data.data.children.map(obj => obj.data);
-        this.setState({ posts });
-      });
+    // axios.get(`http://www.reddit.com/r/teslamoters.json`)
+    //   .then(res => {
+    //     const posts = res.data.data.children.map(obj => obj.data);
+    //     this.setState({ posts });
+    //   });
+    Catalog.search(marketplaceItems => {
+
+      let freshMarketplaceItems = []
+
+      for (var i = 0; i < marketplaceItems.length; i++) {
+        let currentItem = marketplaceItems[i];
+
+        freshMarketplaceItems.push({
+          author: currentItem.document.creatorGamertag,
+          title: currentItem.document.title,
+          image_url: currentItem.document.thumbnailUrl,
+          key: currentItem.document.productId
+        });
+      }
+
+      this.setState({ card_data: freshMarketplaceItems });
+    })
   }
 
   render() {
