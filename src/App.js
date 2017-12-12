@@ -4,13 +4,28 @@ import * as Catalog from './Catalog'
 import { Button } from 'react-bootstrap';
 
 const MarketplaceCard = (props) => {
+  // Generate stars controls
+  let stars = []
+  for (let i = 0; i < 5; ++i) {
+    if (i < props.stars) {
+      var starDiv = <div className="glyphicon glyphicon-star" key={i}/>;
+    }
+    else {
+      var starDiv = <div className="glyphicon glyphicon-star-empty" key={i}/>;
+    }
+    stars.push(starDiv);
+  }
+
   return (
-    <div className="card">
-      <img width="300" src={props.image_url} alt={props.title} />
-      <div className="card-info">
-        <div className="card-info-title">{props.title}</div>
-        <div>{props.author}</div>
-        <button className="btn btn-default">TestButton</button>
+    <div className="col-sm-3 col-md-2">
+      <div className="thumbnail">
+        <img className="card-image" width="300" src={props.image_url} alt={props.title} />
+        <div className="caption">
+          <h3>{props.title} {props.label}</h3>
+          <div>By {props.author}</div>
+          <div>{stars}</div>
+          <button className="btn btn-default">View</button>
+        </div>
       </div>
     </div>
   )
@@ -21,7 +36,8 @@ let sCardListData = [
     author: "Imagiverse",
     title: "Relics of the Privateers",
     image_url: "https://ugcorigin.s-microsoft.com/12/78ec6765-ceb2-4ced-b874-bb4a4dbbd576/550/profile.jpg",
-    key: "G009SXM3DGGW_ModSkuId_"
+    key: "G009SXM3DGGW_ModSkuId_",
+    label: <span className="label label-default">New</span>
   }
 ]
 
@@ -56,13 +72,15 @@ class App extends Component {
       let freshMarketplaceItems = []
 
       for (var i = 0; i < marketplaceItems.length; i++) {
-        let currentItem = marketplaceItems[i];
+        let currentItem = marketplaceItems[i].document;
 
         freshMarketplaceItems.push({
-          author: currentItem.document.creatorGamertag,
-          title: currentItem.document.title,
-          image_url: currentItem.document.thumbnailUrl,
-          key: currentItem.document.productId
+          author: currentItem.creatorGamertag,
+          title: currentItem.title,
+          image_url: currentItem.thumbnailUrl,
+          key: currentItem.productId,
+          label: <span className="label label-default">New</span>,
+          stars: currentItem.averageRating
         });
       }
 
