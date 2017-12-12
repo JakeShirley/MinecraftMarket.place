@@ -22,28 +22,31 @@ const MarketplaceCard = (props) => {
   for (let i = 0; i < 5; ++i) {
     let starDiv = null;
     if (i < Math.round(Number(props.average_rating))) {
-      starDiv = <div className="glyphicon glyphicon-star" key={i} />;
+      starDiv = <i className="fa fa-star" aria-hidden="true" key={i} />;
     }
     else {
-      starDiv = <div className="glyphicon glyphicon-star-empty" key={i} />;
+      starDiv = <i className="fa fa-star-o" aria-hidden="true" key={i} />;
     }
     stars.push(starDiv);
   }
 
   return (
-    <div className="col-sm-3 col-md-2">
-      <div className="thumbnail">
-        <img className="card-image" width="300" src={props.image_url} alt={props.title} />
-        <div>
-          <h4>{props.title} {props.label}</h4>
-          <div>
-            <div>By {props.author}</div>
-            <div>Created {Moment(props.creation_date).format('MM/DD/YYYY')}</div>
-            <div>{stars} {props.average_rating} ({props.total_ratings} ratings)</div>
+    <div className="col-sm-12 col-md-4 col-lg-3">
+      <div className="pad-15">
+        <div className="card">
+          <div className="card-header">
+            <h4 className="card-title">{props.title} {props.label}</h4>
           </div>
-          <form action={props.offer_uri}>
-            <input className="btn btn-default" type="submit" value="Open in Minecraft" />
-          </form>
+          <img className="card-img-top" width="300" src={props.image_url} alt={props.title} />
+          <div className="card-block pad-15">
+            <div>
+              <div className="card-text">By <b>{props.author}</b></div>
+              <div className="card-text">Created {Moment(props.creation_date).format('MM/DD/YYYY')}</div>
+              <div>{stars} {props.average_rating} ({props.total_ratings} ratings)</div>
+            </div>
+
+            <a href={props.offer_uri} className="btn btn-primary">Open in Minecraft</a>
+          </div>
         </div>
       </div>
     </div>
@@ -63,11 +66,13 @@ let sCardListData = [
 
 const MarketplaceCardList = (props) => {
   return (
-    <div>
-      {
-        // Spread card data to props
-        props.cards_data.map(card => <MarketplaceCard {...card} />)
-      }
+    <div className="container">
+      <div className="row no-gutters">
+        {
+          // Spread card data to props
+          props.cards_data.map(card => <MarketplaceCard {...card} />)
+        }
+      </div>
     </div>
   )
 }
@@ -82,11 +87,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    // axios.get(`http://www.reddit.com/r/teslamoters.json`)
-    //   .then(res => {
-    //     const posts = res.data.data.children.map(obj => obj.data);
-    //     this.setState({ posts });
-    //   });
     Catalog.search(marketplaceItems => {
 
       let freshMarketplaceItems = []
@@ -99,11 +99,11 @@ class App extends Component {
 
         let labelControl = null;
         if (currentCreationData > twoWeeksAgo) {
-          labelControl = <span className="label label-danger">New!</span>;
+          labelControl = <span className="badge badge-pill badge-danger">New!</span>;
         }
 
         freshMarketplaceItems.push({
-          author: currentItem.creatorGamertag,
+          author: currentItem.custom.creatorName,
           title: currentItem.title,
           image_url: currentItem.thumbnailUrl,
           key: currentItem.productId,
@@ -111,7 +111,7 @@ class App extends Component {
           average_rating: currentItem.averageRating ? currentItem.averageRating : 0,
           total_ratings: currentItem.totalRatingsCount ? currentItem.totalRatingsCount : 0,
           creation_date: currentItem.creationDate,
-          offer_uri: "minecraft://?showStoreOffer=" + currentItem.productId,
+          offer_uri: "minecraft://openStore?showStoreOffer=" + currentItem.productId,
         });
       }
 
