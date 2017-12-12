@@ -4,9 +4,9 @@ import * as Catalog from './Catalog'
 import * as Moment from 'moment'
 
 function sortMarketplaceItems(items, sortKey) {
-  items.sort(function(a, b) {
-    if(a[sortKey] > b[sortKey]) {
-      return-1;
+  items.sort(function (a, b) {
+    if (a[sortKey] > b[sortKey]) {
+      return -1;
     }
     else {
       return 1;
@@ -41,7 +41,9 @@ const MarketplaceCard = (props) => {
             <div>Created {Moment(props.creation_date).format('MM/DD/YYYY')}</div>
             <div>{stars} {props.average_rating} ({props.total_ratings} ratings)</div>
           </div>
-          <button className="btn btn-default" width="100">View</button>
+          <form action={props.offer_uri}>
+            <input className="btn btn-default" type="submit" value="Open in Minecraft" />
+          </form>
         </div>
       </div>
     </div>
@@ -89,14 +91,14 @@ class App extends Component {
 
       let freshMarketplaceItems = []
 
-      const twoWeeksAgo = new Date(+new Date - 12096e5);
+      const twoWeeksAgo = new Date(new Date() - 12096e5);
       for (var i = 0; i < marketplaceItems.length; i++) {
         let currentItem = marketplaceItems[i].document;
 
         const currentCreationData = Date.parse(currentItem.creationDate);
 
         let labelControl = null;
-        if(currentCreationData > twoWeeksAgo) {
+        if (currentCreationData > twoWeeksAgo) {
           labelControl = <span className="label label-danger">New!</span>;
         }
 
@@ -109,6 +111,7 @@ class App extends Component {
           average_rating: currentItem.averageRating ? currentItem.averageRating : 0,
           total_ratings: currentItem.totalRatingsCount ? currentItem.totalRatingsCount : 0,
           creation_date: currentItem.creationDate,
+          offer_uri: "minecraft://?showStoreOffer=" + currentItem.productId,
         });
       }
 
