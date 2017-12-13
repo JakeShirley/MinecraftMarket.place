@@ -31,8 +31,8 @@ function createSearchBody(tags, skip, count, searchTerm) {
     return result;
 }
 
-export function search(tags, searchTerm, callback) {
-    axios.post(sApiUrl, createSearchBody(tags, 0, 100, searchTerm),
+export function search(tags, count, searchTerm, callback) {
+    axios.post(sApiUrl, createSearchBody(tags, 0, count, searchTerm),
         {
             headers: {
                 "Content-Type": "application/json",

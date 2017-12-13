@@ -84,7 +84,12 @@ class App extends Component {
       sort_options: sSortOptions,
       content_types: sMarketplaceItemTypes,
       current_content_types: [sMarketplaceItemTypes.world_template, sMarketplaceItemTypes.mashup, sMarketplaceItemTypes.skin_pack, sMarketplaceItemTypes.resource_pack],
-      search_term: null
+
+      search_term: null,
+      search_pending: true,
+      search_result_max: 25,
+
+
     };
 
     for (var optionKey in this.state.sort_options) {
@@ -179,17 +184,27 @@ class App extends Component {
       cardData = sortMarketplaceItems(cardData, prevState.current_sort_options.sort_key, prevState.current_sort_options.current_sort);
 
       prevState.filtered_card_data = cardData;
+      prevState.search_pending = false;
+
       return prevState;
     }, () => { if (callback) { callback(); } });
   }
 
   refreshCatalog() {
+    // Clear previous state and prepare to search
+    this.setState((prevState) => {
+      prevState.search_pending = true;
+      prevState.unfiltered_card_data = [];
+      prevState.filtered_card_data = [];
+      return prevState;
+    });
+
     let tags = [];
     for (let i = 0; i < this.state.current_content_types.length; ++i) {
       tags.push(this.state.current_content_types[i].xforge_key);
     }
 
-    Catalog.search(tags, this.state.search_term, marketplaceData => {
+    Catalog.search(tags, this.state.search_result_max, this.state.search_term, marketplaceData => {
       let freshMarketplaceItems = []
 
       const twoWeeksAgo = new Date(new Date() - 12096e5);
@@ -246,6 +261,19 @@ class App extends Component {
   }
 
   render() {
+    let marketplaceContent = null;
+    let searchLabel = null;
+
+    // Show spinner if we're currently searching
+    if (this.state.search_pending) {
+      marketplaceContent = <i className="fa fa-refresh fa-spin" aria-hidden="true"></i>
+      searchLabel = <i>Searching Marketplace</i>
+    }
+    else {
+      marketplaceContent = <MarketplaceCardList cards_data={this.state.filtered_card_data} />;
+      searchLabel = <i>{this.state.filtered_card_data.length} results found</i>
+    }
+
     return (
       <div className="App">
         <header className="App-header">
@@ -258,12 +286,13 @@ class App extends Component {
           <MultiSelectionDropdown available_options={this.state.content_types} selected_options={this.state.current_content_types} select_option={this.addContentTypeFilter} deselect_option={this.removeContentTypeFilter} label="Show Content Types" />
         </nav>
         <p className="App-intro">
-          {this.state.filtered_card_data.length} results found
+          {searchLabel}
         </p>
-        <MarketplaceCardList cards_data={this.state.filtered_card_data} />
+        {marketplaceContent}
       </div>
     );
   }
+
 }
 
 export default App;
