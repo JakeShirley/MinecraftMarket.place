@@ -17,6 +17,37 @@ function sortMarketplaceItems(items, sortKey, swapDirection) {
   return items;
 }
 
+class SearchBox extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { value: '' };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({ value: event.target.value });
+  }
+
+  handleSubmit(event) {
+    this.props.submit_text(this.state.value);
+    event.preventDefault();
+  }
+
+  render() {
+    return (
+      <form className="row" onSubmit={this.handleSubmit}>
+        <div className="form-group">
+          <input type="search" className="form-control col" id="catalog-search" aria-describedby="emailHelp" placeholder="Search Catalog" value={this.state.value} onChange={this.handleChange} />
+          <button type="submit" className="btn btn-primary col">Submit</button>
+          <small id="search-help" className="form-text text-muted col">Searches title and description.</small>
+        </div>
+      </form>
+    )
+  }
+}
+
 const sSortOptions = {
   creation_date: { sort_key: 'creation_date', text: 'By Creation Date', default_sort: false },
   author: { sort_key: 'author', text: 'By Author', default_sort: true },
@@ -44,6 +75,7 @@ class App extends Component {
     this.removeContentTypeFilter = this.removeContentTypeFilter.bind(this);
     this.getContentType = this.getContentType.bind(this);
     this.refreshCatalog = this.refreshCatalog.bind(this);
+    this.search = this.search.bind(this);
 
     this.state = {
       unfiltered_card_data: [],
@@ -52,6 +84,7 @@ class App extends Component {
       sort_options: sSortOptions,
       content_types: sMarketplaceItemTypes,
       current_content_types: [sMarketplaceItemTypes.world_template, sMarketplaceItemTypes.mashup, sMarketplaceItemTypes.skin_pack, sMarketplaceItemTypes.resource_pack],
+      search_term: null,
     };
 
     for (var optionKey in this.state.sort_options) {
@@ -156,7 +189,7 @@ class App extends Component {
       tags.push(this.state.current_content_types[i].xforge_key);
     }
 
-    Catalog.search(tags, marketplaceData => {
+    Catalog.search(tags, this.state.search_term, marketplaceData => {
       let freshMarketplaceItems = []
 
       const twoWeeksAgo = new Date(new Date() - 12096e5);
@@ -202,6 +235,16 @@ class App extends Component {
     this.refreshCatalog();
   }
 
+  search(searchTerm) {
+    this.setState((prevState) => {
+      prevState.search_term = searchTerm;
+      return prevState;
+    }, () => {
+      this.refreshCatalog();
+    });
+
+  }
+
   render() {
     return (
       <div className="App">
@@ -211,6 +254,7 @@ class App extends Component {
         </header>
         <nav className="navbar navbar-toggleable-md navbar-light bg-faded">
           <SingleSelectionDropdown available_options={this.state.sort_options} selected_option={this.state.current_sort_options} select_option={this.setSortOptions} label_prefix="Sort " />
+          <SearchBox submit_text={this.search} />
           <MultiSelectionDropdown available_options={this.state.content_types} selected_options={this.state.current_content_types} select_option={this.addContentTypeFilter} deselect_option={this.removeContentTypeFilter} label="Show Content Types" />
         </nav>
         <p className="App-intro">
