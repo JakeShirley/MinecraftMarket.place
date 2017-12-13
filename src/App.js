@@ -84,7 +84,7 @@ class App extends Component {
       sort_options: sSortOptions,
       content_types: sMarketplaceItemTypes,
       current_content_types: [sMarketplaceItemTypes.world_template, sMarketplaceItemTypes.mashup, sMarketplaceItemTypes.skin_pack, sMarketplaceItemTypes.resource_pack],
-      search_term: null,
+      search_term: null
     };
 
     for (var optionKey in this.state.sort_options) {
@@ -258,7 +258,7 @@ class App extends Component {
           <MultiSelectionDropdown available_options={this.state.content_types} selected_options={this.state.current_content_types} select_option={this.addContentTypeFilter} deselect_option={this.removeContentTypeFilter} label="Show Content Types" />
         </nav>
         <p className="App-intro">
-          Don't be too impressed by this WIP.
+          {this.state.filtered_card_data.length} results found
         </p>
         <MarketplaceCardList cards_data={this.state.filtered_card_data} />
       </div>
