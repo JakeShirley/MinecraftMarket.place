@@ -48,6 +48,62 @@ class SearchBox extends React.Component {
   }
 }
 
+
+class PageNav extends React.Component {
+  constructor(props) {
+    super(props);
+
+    // Methods
+    this.setPage = this.setPage.bind(this);
+    this.movePage = this.movePage.bind(this);
+  }
+
+  setPage(pageIndex) {
+    this.props.select_page(pageIndex);
+  }
+
+  movePage(pageDirection) {
+    this.props.select_page(this.props.current_page + pageDirection);
+  }
+
+  render() {
+    let pageControls = [];
+
+    // Previous
+    pageControls.push((
+      <li className={this.props.current_page === 0 ? "page-item disabled" : "page-item"} key="previous">
+        <button className="page-link" tabIndex="-1" onClick={() => this.movePage(-1)}>Previous</button>
+      </li>
+    ));
+
+    for(let i = 0; i < this.props.page_count; ++i) {
+      let currentClass = "page-item";
+      if(i === this.props.current_page) {
+        currentClass = "page-item disabled";
+      }
+
+      pageControls.push((
+        <li className={currentClass} key={i}><button className="page-link" onClick={() => this.setPage(i)} page_index={i}>{i + 1}</button></li>
+      ));
+    }
+
+    // Next
+    pageControls.push((
+      <li className={this.props.current_page >= (this.props.page_count - 1) ? "page-item disabled" : "page-item"} key="next">
+        <button className="page-link" tabIndex="-1" onClick={() => this.movePage(1)}>Next</button>
+      </li>
+    ));
+
+    return (
+      <nav aria-label="Page navigation">
+        <ul className="pagination justify-content-end">
+         {pageControls}
+        </ul>
+      </nav>
+    );
+  }
+}
+
 const sSortOptions = {
   creation_date: { sort_key: 'creation_date', text: 'By Creation Date', default_sort: false },
   author: { sort_key: 'author', text: 'By Author', default_sort: true },
@@ -76,6 +132,7 @@ class App extends Component {
     this.getContentType = this.getContentType.bind(this);
     this.refreshCatalog = this.refreshCatalog.bind(this);
     this.search = this.search.bind(this);
+    this.setSearchPage = this.setSearchPage.bind(this);
 
     this.state = {
       unfiltered_card_data: [],
@@ -87,9 +144,11 @@ class App extends Component {
 
       search_term: null,
       search_pending: true,
-      search_result_max: 25,
-
-
+      search_per_page: 25,
+      search_page: 0,
+      search_page_count: 0,
+      search_results_total: 0,
+      search_skip: 0,
     };
 
     for (var optionKey in this.state.sort_options) {
@@ -164,6 +223,17 @@ class App extends Component {
     });
   }
 
+  setSearchPage(pageNumber) {
+    this.setState((prevState) => {
+      prevState.search_page = pageNumber;
+      prevState.search_skip = prevState.search_per_page * prevState.search_page;
+
+      return prevState;
+    }, () => {
+      this.refreshCatalog();
+    });
+  }
+
   sortMarketplaceContent(callback) {
     this.setState((prevState) => {
       let cardData = [];
@@ -193,9 +263,9 @@ class App extends Component {
   refreshCatalog() {
     // Clear previous state and prepare to search
     this.setState((prevState) => {
-      prevState.search_pending = true;
       prevState.unfiltered_card_data = [];
       prevState.filtered_card_data = [];
+
       return prevState;
     });
 
@@ -204,7 +274,7 @@ class App extends Component {
       tags.push(this.state.current_content_types[i].xforge_key);
     }
 
-    Catalog.search(tags, this.state.search_result_max, this.state.search_term, marketplaceData => {
+    Catalog.search(tags, this.state.search_per_page, this.state.search_skip, this.state.search_term, marketplaceData => {
       let freshMarketplaceItems = []
 
       const twoWeeksAgo = new Date(new Date() - 12096e5);
@@ -242,7 +312,15 @@ class App extends Component {
       }
 
       // Set state then sort
-      this.setState({ unfiltered_card_data: freshMarketplaceItems }, () => this.sortMarketplaceContent());
+      this.setState((prevState) => {
+        prevState.unfiltered_card_data = freshMarketplaceItems;
+        prevState.search_results_total = marketplaceData.count;
+        prevState.search_page_count = Math.ceil(Number(prevState.search_results_total) / prevState.search_per_page);
+
+        return prevState;
+      }, function () {
+        this.sortMarketplaceContent()
+      });
     })
   }
 
@@ -253,6 +331,14 @@ class App extends Component {
   search(searchTerm) {
     this.setState((prevState) => {
       prevState.search_term = searchTerm;
+      prevState.search_pending = true;
+      
+      // Reset search stuff
+      prevState.search_results_total = 0;
+      prevState.search_page = 0;
+      prevState.search_page_count = 0;
+      prevState.search_skip = 0;
+
       return prevState;
     }, () => {
       this.refreshCatalog();
@@ -271,7 +357,7 @@ class App extends Component {
     }
     else {
       marketplaceContent = <MarketplaceCardList cards_data={this.state.filtered_card_data} />;
-      searchLabel = <i>{this.state.filtered_card_data.length} results found</i>
+      searchLabel = <i>Showing results {this.state.search_skip} - {this.state.search_skip + this.state.filtered_card_data.length - 1} of {this.state.search_results_total}</i>
     }
 
     return (
@@ -285,6 +371,7 @@ class App extends Component {
           <SearchBox submit_text={this.search} />
           <MultiSelectionDropdown available_options={this.state.content_types} selected_options={this.state.current_content_types} select_option={this.addContentTypeFilter} deselect_option={this.removeContentTypeFilter} label="Show Content Types" />
         </nav>
+        <PageNav page_count={this.state.search_page_count} current_page={this.state.search_page} select_page={this.setSearchPage} />
         <p className="App-intro">
           {searchLabel}
         </p>
