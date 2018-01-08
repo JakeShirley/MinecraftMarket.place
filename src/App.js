@@ -5,14 +5,14 @@ import { SingleSelectionDropdown, MultiSelectionDropdown } from './SelectionDrop
 import { MarketplaceCardList } from './MarketplaceCardList'
 
 function sortMarketplaceItems(items, sortKey, swapDirection) {
-  items.sort(function (a, b) {
-    if (a[sortKey] > b[sortKey]) {
-      return swapDirection ? 1 : -1;
-    }
-    else {
-      return swapDirection ? -1 : 1;
-    }
-  });
+  // items.sort(function (a, b) {
+  //   if (a[sortKey] > b[sortKey]) {
+  //     return swapDirection ? 1 : -1;
+  //   }
+  //   else {
+  //     return swapDirection ? -1 : 1;
+  //   }
+  // });
 
   return items;
 }
@@ -367,7 +367,7 @@ class App extends Component {
           <h1 className="App-title">Welcome to Minecraft Market Place Demo</h1>
         </header>
         <nav className="navbar navbar-toggleable-md navbar-light bg-faded">
-          <SingleSelectionDropdown available_options={this.state.sort_options} selected_option={this.state.current_sort_options} select_option={this.setSortOptions} label_prefix="Sort " />
+          {/*<SingleSelectionDropdown available_options={this.state.sort_options} selected_option={this.state.current_sort_options} select_option={this.setSortOptions} label_prefix="Sort " />*/}
           <SearchBox submit_text={this.search} />
           <MultiSelectionDropdown available_options={this.state.content_types} selected_options={this.state.current_content_types} select_option={this.addContentTypeFilter} deselect_option={this.removeContentTypeFilter} label="Show Content Types" />
         </nav>
